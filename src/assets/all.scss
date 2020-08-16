@@ -1,0 +1,20 @@
+$color-main: #4C5356;
+$color-secand: #495156;
+
+* {
+  font-family: Andale Mono,AndaleMono,monospace;
+  color: $color-main;
+  padding: 0;
+  margin: 0;
+  // outline: 1px solid red;
+}
+.footer {
+  background: $color-secand;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  .footer-item {
+    color: #EEF3F5;
+    margin: 1rem .5rem;
+  }
+}
