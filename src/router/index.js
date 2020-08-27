@@ -15,6 +15,11 @@ const routes = [
     name: 'RoomPage',
     component: () => import('@/views/RoomPage.vue'),
   },
+  {
+    path: '/order',
+    name: 'ChackOrder',
+    component: () => import('@/views/chackOrder.vue'),
+  },
 ];
 
 const router = new VueRouter({

@@ -18,29 +18,18 @@
 <script>
 export default {
   name: 'Home',
-  components: {
-  },
-  data() {
-    return {
-      rooms: [],
-    };
-  },
   created() {
     this.getRooms();
   },
   methods: {
     getRooms() {
       const vm = this;
-      const api = process.env.VUE_APP_APIPATH;
-      vm.$store.state.isLoading = true;
-      vm.axios.get(api, {
-        headers: {
-          Authorization: `Bearer ${process.env.VUE_APP_APITOKEN}`,
-        },
-      }).then((res) => {
-        vm.rooms = res.data;
-        vm.$store.state.isLoading = false;
-      });
+      vm.$store.dispatch('getRooms');
+    },
+  },
+  computed: {
+    rooms() {
+      return this.$store.state.rooms;
     },
   },
 };
@@ -79,7 +68,7 @@ export default {
   &::after {
     content: '';
     position: absolute;
-    height: calc(90% - 10px);
+    height: 90%;
     left: 0;
     border-left: 8px solid rgba(0, 0, 0, 0.5);
   }
