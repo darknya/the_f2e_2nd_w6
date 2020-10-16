@@ -8,11 +8,28 @@
     </div>
     <div class="room-content">
       <div class="room-info">
-        <h2 class="info-title">
-          {{roomData.room[0].name}}
-          <span class="title-icon"> 0000</span>
-          <span class="title-icon"> 0000</span>
-        </h2>
+        <div class="info-title">
+          <h2 class="title">{{roomData.room[0].name}}</h2>
+        </div>
+        <div class="info-short">
+            <span class="guest">
+              <img src="@/assets/icon_user.svg" alt="">
+              {{numOfPeople}}
+            </span>
+            <span class="bed">
+              <img src="@/assets/icon_bed.svg" alt="">
+              {{`${roomData.room[0].descriptionShort.Bed[0]}*${roomData.room[0]
+                .descriptionShort.Bed.length}`}}
+            </span>
+            <span class="bath">
+              <img src="@/assets/icon_bath.svg" alt="">
+              {{roomData.room[0].descriptionShort['Private-Bath']}}
+            </span>
+            <span class="footage">
+              <img src="@/assets/icon_size.svg" alt="">
+              {{roomData.room[0].descriptionShort.Footage}} ㎡
+            </span>
+        </div>
         <div class="info-body">
           <p class="body-description">
             {{roomData.room[0].description}}
@@ -22,8 +39,8 @@
             / Check-out: {{roomData.room[0].checkInAndOut.checkOut}}
           </p>
           <p>
-            Weekday(Mon - Thu): ${{roomData.room[0].normalDayPrice}}
-            / Weekend(Fri - Sun): ${{roomData.room[0].holidayPrice}}
+            Weekday(Mon - Thu) : ${{roomData.room[0].normalDayPrice}}
+            / Weekend(Fri - Sun) : ${{roomData.room[0].holidayPrice}}
           </p>
         </div>
         <div class="info-amenities">
@@ -36,10 +53,11 @@
       </div>
       <div class="room-booking">
         <!-- <img src="https://fakeimg.pl/300x300/777"> -->
-        <vc-date-picker :rows="1" mode="range" :min-date="new Date()"
-          v-model="bookingDates"
+        <vc-date-picker :rows="1" mode="range"
+          :min-date="new Date(Math.floor(new Date()) + (1000*60*60*24))"
+          v-model="pickDate"
           color="gray"
-          :disabled-dates='roomData.booking.map((i) => i.date)'
+          :disabled-dates="roomData.booking.map((i) => i.date)"
           is-inline />
         <div class="price-block">
           <div class="normalday">
@@ -58,8 +76,8 @@
               (totalDayNight.weekend*roomData.room[0].holidayPrice)}}</p>
           </div>
         </div>
-        <router-link to="/order">
-          <button class="btn order-btn" @click="bookingRoom()">Order</button>
+        <router-link :to="{name: 'ChackOrder', params: { roomID : this.$route.params.roomID }}">
+          <button class="btn order-btn" @click="upBookingRoom()">Order</button>
         </router-link>
       </div>
     </div>
@@ -75,7 +93,7 @@ export default {
   },
   data() {
     return {
-      bookingDates: {
+      pickDate: {
         start: null,
         end: null,
       },
@@ -86,7 +104,7 @@ export default {
     this.getOneRoom();
   },
   watch: {
-    bookingDates() {
+    pickDate() {
       this.totalDayNight = this.getTotalNight();
     },
   },
@@ -104,15 +122,15 @@ export default {
       }
     },
     getTotalNight() {
-      if (!this.bookingDates) {
+      if (!this.pickDate) {
         return {
           weekday: 0,
           weekend: 0,
         };
       }
-      const startDay = this.bookingDates.start.getDay();
-      const endDay = this.bookingDates.end.getDay();
-      const totalNight = parseInt((this.bookingDates.end - this.bookingDates.start)
+      const startDay = this.pickDate.start.getDay();
+      const endDay = this.pickDate.end.getDay();
+      const totalNight = parseInt((this.pickDate.end - this.pickDate.start)
           / 1000 / 60 / 60 / 24, 10);
       let weekday = 0;
       let weekend = 0;
@@ -141,12 +159,13 @@ export default {
         weekend,
       };
     },
-    bookingRoom() {
-      const data = {
-        date: this.toDateArry,
-        roomId: this.$route.params.roomID,
-      };
-      this.$store.dispatch('upDataPickDateData', data);
+    upBookingRoom() {
+      this.$store.dispatch('upBookingDate', this.pickDate);
+      this.$store.dispatch('upDataPickDateData',
+        {
+          date: this.toDateArry,
+          roomId: this.$route.params.roomID,
+        });
     },
   },
   computed: {
@@ -154,7 +173,10 @@ export default {
       return this.$store.state.roomData;
     },
     toDateArry() {
-      const dateEnd = this.bookingDates.end;
+      if (!this.pickDate) {
+        return [];
+      }
+      const dateEnd = this.pickDate.end;
       const totalNight = this.totalDayNight.weekday + this.totalDayNight.weekend;
       const dateArry = [];
       for (let i = 0; i < totalNight; i += 1) {
@@ -162,6 +184,14 @@ export default {
           .toISOString().slice(0, 10));
       }
       return dateArry;
+    },
+    numOfPeople() {
+      let people = `${this.roomData.room[0].descriptionShort.GuestMin} - ${this
+        .roomData.room[0].descriptionShort.GuestMax}`;
+      if (this.roomData.room[0].descriptionShort.GuestMax === 1) {
+        people = '1';
+      }
+      return people;
     },
   },
 };
@@ -195,7 +225,20 @@ export default {
     padding: 1.2rem 1.2rem;
     .room-info {
       width: 55%;
-      .info-title, .info-body, .info-amenities{
+      .info-title {
+        width: 100%;
+      }
+      .info-short {
+        display: flex;
+        flex-wrap: wrap;
+        &>:nth-child(-n+3) {
+          margin: 0 1.6rem 0 0;
+        }
+        img {
+          vertical-align: middle;
+        }
+      }
+      .info-short, .body-description, .info-body, .info-amenities{
         margin-bottom: 1.8rem;
       }
     }
@@ -239,23 +282,15 @@ export default {
       }
     }
   }
-  .btn {
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-    color: #FFF;
-    padding: 8px 35px;
-    border: none;
-    outline: none;
-    border-radius: 25px;
-    background-color: #495156;
-    margin: .8rem 0;
-    &:hover {
-      box-shadow: 1px 1px 5px 0 #495156;
-    }
-  }
+
 @media (max-width: 768px) {
   .info-amenities ul li {
     width: 33%;
+  }
+  .room-content {
+    .info-title {
+      flex-direction: column;
+    }
   }
 }
 

@@ -9,6 +9,10 @@ export default new Vuex.Store({
     rooms: [],
     roomData: null,
     isLoading: false,
+    pickDateRange: {
+      start: null,
+      end: null,
+    },
     pickDateData: {
       date: [],
       roomId: '',
@@ -18,30 +22,30 @@ export default new Vuex.Store({
     LOADING(state, status) {
       state.isLoading = status;
     },
-    ROOMSDATA(state, datas) {
+    SETROOMSDATA(state, datas) {
       state.rooms = datas;
     },
-    ONEROOMDATA(state, onedata) {
+    SETONEROOMDATA(state, onedata) {
       state.roomData = onedata;
     },
     UPPICKDATEDATA(state, pickDateData) {
       state.pickDateData = pickDateData;
     },
+    UPPICKDATE(state, pickDate) {
+      state.pickDateRange = pickDate;
+    },
   },
   actions: {
-    // updateLoading(context, status) {
-    //   context.commit('LOADING', status);
-    // },
-    getRooms(context) {
+    getRooms({ commit }) {
       const api = `${process.env.VUE_APP_APIPATH}/rooms`;
-      context.commit('LOADING', true);
+      commit('LOADING', true);
       Vue.axios.get(api, {
         headers: {
           Authorization: `Bearer ${process.env.VUE_APP_APITOKEN}`,
         },
       }).then((res) => {
-        context.commit('ROOMSDATA', res.data);
-        context.commit('LOADING', false);
+        commit('SETROOMSDATA', res.data);
+        commit('LOADING', false);
       });
     },
     getOneRoom(context, roomId) {
@@ -52,9 +56,12 @@ export default new Vuex.Store({
           Authorization: `Bearer ${process.env.VUE_APP_APITOKEN}`,
         },
       }).then((res) => {
-        context.commit('ONEROOMDATA', res.data);
+        context.commit('SETONEROOMDATA', res.data);
         context.commit('LOADING', false);
       }).catch((err) => console.log(err));
+    },
+    upBookingDate({ commit }, data) {
+      commit('UPPICKDATE', data);
     },
     upDataPickDateData(context, data) {
       context.commit('UPPICKDATEDATA', data);
@@ -75,12 +82,16 @@ export default new Vuex.Store({
       context.commit('LOADING', true);
       Vue.axios.post(api, data, headers).then((res) => {
         console.log(res);
+        context.dispatch('getOneRoom', payload.roomId);
         context.commit('LOADING', false);
       }).catch((err) => {
         console.log(err.response.data);
         context.commit('LOADING', false);
       });
     },
+  },
+  getters: {
+
   },
   modules: {
   },

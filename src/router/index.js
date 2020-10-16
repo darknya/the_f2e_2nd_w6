@@ -13,12 +13,12 @@ const routes = [
   {
     path: '/room/:roomID',
     name: 'RoomPage',
-    component: () => import('@/views/RoomPage.vue'),
+    component: () => import(/* webpackChunkName: "RoomPage" */ '@/views/RoomPage.vue'),
   },
   {
-    path: '/order',
+    path: '/order/:roomID',
     name: 'ChackOrder',
-    component: () => import('@/views/chackOrder.vue'),
+    component: () => import(/* webpackChunkName: "ChackOrder" */ '@/views/chackOrder.vue'),
   },
 ];
 

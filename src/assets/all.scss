@@ -19,3 +19,17 @@ $color-secand: #495156;
     margin: 1rem .5rem;
   }
 }
+.btn {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: #FFF;
+  padding: 8px 35px;
+  border: none;
+  outline: none;
+  border-radius: 25px;
+  background-color: #495156;
+  margin: .8rem 0;
+  &:hover {
+    box-shadow: 1px 1px 5px 0 #495156;
+  }
+}

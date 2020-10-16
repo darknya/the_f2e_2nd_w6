@@ -7,7 +7,7 @@
     </div>
     <div class="rooms">
       <router-link :to="{name: 'RoomPage', params: { roomID: room.id }}"
-        class="room-card" v-for="(room) in rooms.items" :key="room.id">
+        class="room-card" v-for="(room) in rooms" :key="room.id">
         <img class="card-img" :src="room.imageUrl" alt="">
         <div class="card-title">{{room.name}}</div>
       </router-link>
@@ -23,13 +23,12 @@ export default {
   },
   methods: {
     getRooms() {
-      const vm = this;
-      vm.$store.dispatch('getRooms');
+      this.$store.dispatch('getRooms');
     },
   },
   computed: {
     rooms() {
-      return this.$store.state.rooms;
+      return this.$store.state.rooms.items;
     },
   },
 };

@@ -57,12 +57,13 @@ export default {
   .dots {
     position: absolute;
     bottom: 3px;
-    right: calc(50% - 30px);
+    right: 50%;
+    transform: translateX(50%);
     .dot {
       cursor: pointer;
-      width: 1rem;
-      height: 1rem;
-      margin: 0 2px;
+      width: .6rem;
+      height: .6rem;
+      margin: 0 .8rem;
       background-color: #aaa;
       border-radius: 50%;
       display: inline-block;
