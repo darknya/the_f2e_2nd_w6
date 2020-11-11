@@ -1,5 +1,5 @@
 # the_f2e_2nd_w6
-
+## [DEMO Link](https://darknya.github.io/the_f2e_2nd_w6/dist/#/) 
 ## Project setup
 ```
 npm install
