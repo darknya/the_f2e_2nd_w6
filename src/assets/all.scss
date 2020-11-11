@@ -7,7 +7,11 @@ $color-secand: #495156;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  letter-spacing: 1px;
   // outline: 1px solid red;
+}
+img {
+  vertical-align: middle;
 }
 .footer {
   background: $color-secand;
@@ -27,9 +31,12 @@ $color-secand: #495156;
   border: none;
   outline: none;
   border-radius: 25px;
-  background-color: #495156;
+  background-color: $color-secand;
   margin: .8rem 0;
   &:hover {
-    box-shadow: 1px 1px 5px 0 #495156;
+    box-shadow: 1px 1px 5px 0 $color-secand;
+  }
+  &:disabled {
+    opacity: 0.5;
   }
 }

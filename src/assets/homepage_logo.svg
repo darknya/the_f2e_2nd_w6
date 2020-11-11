@@ -21,7 +21,7 @@
                     <use fill="url(#linearGradient-1)" xlink:href="#path-2"></use>
                     <use fill-opacity="0.69" fill="url(#pattern-3)" style="mix-blend-mode: overlay;" xlink:href="#path-2"></use>
                 </g>
-                <text id="The-House" font-family="AndaleMono, Andale Mono" font-size="35" font-weight="normal" fill="#314954">
+                <text id="The-House" font-family="AndaleMono, Andale Mono, monospace" font-size="35" font-weight="normal" fill="#314954">
                     <tspan x="96" y="32">The House</tspan>
                 </text>
                 <path d="M281.037806,1 L269.603152,15.3892753 C267.885146,17.5511997 268.245013,20.6965046 270.406937,22.4145104 C271.291432,23.1173879 272.387897,23.5 273.517662,23.5 L287,23.5 C289.209139,23.5 291,25.290861 291,27.5 C291,27.5515911 290.999002,27.6031774 290.997006,27.6547299 L290.695853,35.4341571 C290.613187,37.5696091 288.866536,39.262907 286.729548,39.2793093 L62.5481365,41" id="Path" stroke="#8D8073" stroke-width="2" stroke-linecap="round" transform="translate(176.774068, 21.000000) scale(-1, 1) translate(-176.774068, -21.000000) "></path>

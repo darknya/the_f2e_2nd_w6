@@ -76,7 +76,8 @@
               (totalDayNight.weekend*roomData.room[0].holidayPrice)}}</p>
           </div>
         </div>
-        <router-link :to="{name: 'ChackOrder', params: { roomID : this.$route.params.roomID }}">
+        <router-link :to="{name: 'ChackOrder',
+        params: { roomID : this.$route.params.roomID }}">
           <button class="btn order-btn" @click="upBookingRoom()">Order</button>
         </router-link>
       </div>
@@ -97,7 +98,6 @@ export default {
         start: null,
         end: null,
       },
-      totalDayNight: {},
     };
   },
   created() {
@@ -105,7 +105,7 @@ export default {
   },
   watch: {
     pickDate() {
-      this.totalDayNight = this.getTotalNight();
+      this.$store.dispatch('getTotalNight', this.pickDate);
     },
   },
   methods: {
@@ -121,69 +121,16 @@ export default {
         return images('./icon_error-outline.svg');
       }
     },
-    getTotalNight() {
-      if (!this.pickDate) {
-        return {
-          weekday: 0,
-          weekend: 0,
-        };
-      }
-      const startDay = this.pickDate.start.getDay();
-      const endDay = this.pickDate.end.getDay();
-      const totalNight = parseInt((this.pickDate.end - this.pickDate.start)
-          / 1000 / 60 / 60 / 24, 10);
-      let weekday = 0;
-      let weekend = 0;
-      if (totalNight <= 6) { // 小於6夜
-        if (startDay > endDay) { // 跨週
-          weekend += 2;
-          if (startDay === 6) { // 起始日為周六要減一夜
-            weekend -= 1;
-          }
-        } else if (endDay === 6) { // 同一週 且結束日為周六
-          weekend += 1;
-        }
-        weekday = totalNight - weekend; // 總夜 - 周末夜 = 一般夜
-      } else { // 大於6個晚上
-        const fullWeekEnd = ((totalNight - (7 - startDay + endDay)) / 7) * 2; // 去頭尾兩週的周末夜
-        weekend += fullWeekEnd;
-        if (startDay === 6) weekend += 1; // 將頭尾兩周的周末夜加回
-        if (endDay === 6) weekend += 1;
-        if (startDay <= 5) {
-          weekend += 2;
-        }
-        weekday = totalNight - weekend;
-      }
-      return {
-        weekday,
-        weekend,
-      };
-    },
     upBookingRoom() {
       this.$store.dispatch('upBookingDate', this.pickDate);
-      this.$store.dispatch('upDataPickDateData',
-        {
-          date: this.toDateArry,
-          roomId: this.$route.params.roomID,
-        });
     },
   },
   computed: {
     roomData() {
       return this.$store.state.roomData;
     },
-    toDateArry() {
-      if (!this.pickDate) {
-        return [];
-      }
-      const dateEnd = this.pickDate.end;
-      const totalNight = this.totalDayNight.weekday + this.totalDayNight.weekend;
-      const dateArry = [];
-      for (let i = 0; i < totalNight; i += 1) {
-        dateArry.push(new Date(dateEnd - new Date(1000 * 60 * 60 * 24 * i))
-          .toISOString().slice(0, 10));
-      }
-      return dateArry;
+    totalDayNight() {
+      return this.$store.state.totleNight;
     },
     numOfPeople() {
       let people = `${this.roomData.room[0].descriptionShort.GuestMin} - ${this

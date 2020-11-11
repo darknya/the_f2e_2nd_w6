@@ -9,18 +9,25 @@ export default new Vuex.Store({
     rooms: [],
     roomData: null,
     isLoading: false,
+    alert: false,
     pickDateRange: {
       start: null,
       end: null,
     },
-    pickDateData: {
-      date: [],
-      roomId: '',
+    totleNight: {},
+    bookingResData: {
+      status: 400,
+      data: {
+        message: '',
+      },
     },
   },
   mutations: {
     LOADING(state, status) {
       state.isLoading = status;
+    },
+    ALERT(state, status) {
+      state.alert = status;
     },
     SETROOMSDATA(state, datas) {
       state.rooms = datas;
@@ -28,14 +35,20 @@ export default new Vuex.Store({
     SETONEROOMDATA(state, onedata) {
       state.roomData = onedata;
     },
-    UPPICKDATEDATA(state, pickDateData) {
-      state.pickDateData = pickDateData;
-    },
     UPPICKDATE(state, pickDate) {
       state.pickDateRange = pickDate;
     },
+    TOTLENIGHT(state, nights) {
+      state.totleNight = nights;
+    },
+    BOOKINGRESDATA(state, resData) {
+      state.bookingResData = resData;
+    },
   },
   actions: {
+    alert({ commit }, payload) {
+      commit('ALERT', payload);
+    },
     getRooms({ commit }) {
       const api = `${process.env.VUE_APP_APIPATH}/rooms`;
       commit('LOADING', true);
@@ -63,10 +76,7 @@ export default new Vuex.Store({
     upBookingDate({ commit }, data) {
       commit('UPPICKDATE', data);
     },
-    upDataPickDateData(context, data) {
-      context.commit('UPPICKDATEDATA', data);
-    },
-    bookingRoom(context, payload) {
+    bookingRoom({ commit, dispatch }, payload) {
       const api = `${process.env.VUE_APP_APIPATH}/room/${payload.roomId}`;
       const data = {
         name: payload.name,
@@ -79,15 +89,61 @@ export default new Vuex.Store({
           accept: 'application/json',
         },
       };
-      context.commit('LOADING', true);
+      commit('LOADING', true);
       Vue.axios.post(api, data, headers).then((res) => {
-        console.log(res);
-        context.dispatch('getOneRoom', payload.roomId);
-        context.commit('LOADING', false);
+        // console.log(res);
+        const { status } = res;
+        dispatch('getOneRoom', payload.roomId);
+        commit('BOOKINGRESDATA', { status });
+        commit('ALERT', true);
+        commit('LOADING', false);
       }).catch((err) => {
-        console.log(err.response.data);
-        context.commit('LOADING', false);
+        // console.log(err.response);
+        const { status } = err.response;
+        const resMsg = err.response.data.message;
+        commit('BOOKINGRESDATA', { status, resMsg });
+        commit('ALERT', true);
+        commit('LOADING', false);
       });
+    },
+    getTotalNight({ commit }, pickDate) {
+      if (!pickDate) {
+        commit('TOTLENIGHT', {
+          weekday: 0,
+          weekend: 0,
+        });
+      } else {
+        const startDay = pickDate.start.getDay();
+        const endDay = pickDate.end.getDay();
+        const totalNight = parseInt((pickDate.end - pickDate.start)
+            / 1000 / 60 / 60 / 24, 10);
+        let weekday = 0;
+        let weekend = 0;
+        if (totalNight <= 6) { // 小於6夜
+          if (startDay > endDay) { // 跨週
+            weekend += 2;
+            if (startDay === 6) { // 起始日為周六要減一夜
+              weekend -= 1;
+            }
+          } else if (endDay === 6) { // 同一週 且結束日為周六
+            weekend += 1;
+          }
+          weekday = totalNight - weekend; // 總夜 - 周末夜 = 一般夜
+        } else { // 大於6個晚上
+          const fullWeekEnd = ((totalNight - (7 - startDay + endDay)) / 7) * 2; // 去頭尾兩週的周末夜
+          weekend += fullWeekEnd;
+          if (startDay === 6) weekend += 1; // 將頭尾兩周的周末夜加回
+          if (endDay === 6) weekend += 1;
+          if (startDay <= 5) {
+            weekend += 2;
+          }
+          weekday = totalNight - weekend;
+        }
+        commit('TOTLENIGHT', {
+          weekday,
+          weekend,
+        });
+      }
     },
   },
   getters: {

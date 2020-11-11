@@ -35,24 +35,26 @@
         <form action="">
           <div class="user">
             <label for="user-name">Name</label>
-            <input type="text" id="user-name" v-model="userInfo.name">
+            <input type="text" id="user-name" v-model="name">
             <label for="user-phone">Phone</label>
-            <input type="text" id="user-phone" v-model="userInfo.tel">
+            <input type="text" id="user-phone" v-model="tel">
           </div>
           <div class="date">
-            <vc-date-picker mode="range" :min-date="new Date()" v-model="pickDate" color="gray"
+            <vc-date-picker mode="range" v-model="pickDate" color="gray"
+              :min-date="new Date(Math.floor(new Date()) + (1000*60*60*24))"
               :disabled-dates="roomData.booking.map((i) => i.date)"/>
-            <span class="icon-date">
-              <img src="" alt="">
+            <span class="date-icon">
+              <img src="@/assets/icon_calendar.svg" alt="">
             </span>
           </div>
         </form>
       </div>
       <div class="gurp">
       <div class="total-price">
-        <p>total: $99,999</p>
+        <p>total: ${{ (totalDayNight.weekday*roomData.room[0].normalDayPrice) +
+              (totalDayNight.weekend*roomData.room[0].holidayPrice) }}</p>
       </div>
-      <button class="btn" @click="postBookingRoom">Confirm</button>
+      <button class="btn" @click="postBookingRoom" :disabled="formValidation">Confirm</button>
       </div>
     </div>
   </div>
@@ -62,15 +64,19 @@
 export default {
   data() {
     return {
-      pickDate: {},
-      userInfo: {
-        name: '',
-        tel: '',
-      },
+      pickDate: null,
+      name: '',
+      tel: '',
+      telError: true,
     };
   },
   created() {
     this.getPickDate();
+  },
+  watch: {
+    pickDate() {
+      this.$store.dispatch('getTotalNight', this.pickDate);
+    },
   },
   methods: {
     getPickDate() {
@@ -82,10 +88,10 @@ export default {
     postBookingRoom() {
       const vm = this;
       const data = {
-        name: this.userInfo.name,
-        tel: this.userInfo.tel,
-        date: this.$store.state.pickDateData.date,
-        roomId: this.$store.state.pickDateData.roomId,
+        name: this.name,
+        tel: this.tel,
+        date: this.toDateArry,
+        roomId: this.$route.params.roomID,
       };
       vm.$store.dispatch('bookingRoom', data);
       vm.$router.push('/');
@@ -97,6 +103,32 @@ export default {
     },
     roomImage() {
       return this.$store.state.roomData.room[0].imageUrl[0];
+    },
+    totalDayNight() {
+      return this.$store.state.totleNight;
+    },
+    toDateArry() {
+      if (!this.pickDate) {
+        return [];
+      }
+      const dateStart = this.pickDate.start;
+      let totalNight = parseInt((this.pickDate.end - this.pickDate.start)
+          / 1000 / 60 / 60 / 24, 10);
+      if (Math.floor(this.pickDate.start) === Math.floor(this.pickDate.end)) totalNight = 1;
+      const dateArry = [];
+      for (let i = 0; i < totalNight; i += 1) {
+        dateArry.push(new Date(dateStart.getTime() + (1000 * 60 * 60 * 24 * i) + (3600000 * 8))
+          .toISOString().slice(0, 10));
+      }
+      return dateArry;
+    },
+    formValidation() {
+      const RegStr = /^\s+|\s+$/g;
+      const nameError = RegStr.test(this.name) || !this.name;
+      const RegNum = /^\d+$/;
+      const telError = !RegNum.test(this.tel);
+      const pickDateError = !this.pickDate;
+      return nameError || telError || pickDateError;
     },
   },
 };
@@ -141,8 +173,15 @@ export default {
         }
       }
       .date {
+        position: relative;
         width: 100%;
-        padding: 50px 0;
+        margin: 50px 0;
+        .date-icon {
+          height: 100%;
+          position: absolute;
+          right: 0;
+          bottom: 3px;
+        }
         input {
           width: 100%;
           outline: none;
