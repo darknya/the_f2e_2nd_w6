@@ -61,7 +61,7 @@ export default {
 }
 .room-card {
   position: relative;
-  max-width: 25%;
+  width: 25%;
   height: 300px;
   margin-bottom: 40px;
   &::after {
@@ -92,7 +92,7 @@ export default {
 }
 @media (max-width: 768px) {
   .room-card {
-    max-width: 40%;
+    width: 40%;
   }
   .room-card:not(:nth-child(3n)) {
     margin-right: 0;
@@ -104,7 +104,7 @@ export default {
 
 @media (max-width: 576px) {
   .room-card {
-    max-width: 80%;
+    width: 80%;
   }
   .room-card:not(:nth-child(2n)) {
     margin-right: 0;
