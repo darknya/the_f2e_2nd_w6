@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import API from '@/api/service';
 
 Vue.use(Vuex);
 
@@ -50,25 +51,15 @@ export default new Vuex.Store({
       commit('ALERT', payload);
     },
     getRooms({ commit }) {
-      const api = `${process.env.VUE_APP_APIPATH}/rooms`;
       commit('LOADING', true);
-      Vue.axios.get(api, {
-        headers: {
-          Authorization: `Bearer ${process.env.VUE_APP_APITOKEN}`,
-        },
-      }).then((res) => {
+      API.get('rooms').then((res) => {
         commit('SETROOMSDATA', res.data);
         commit('LOADING', false);
       });
     },
-    getOneRoom(context, roomId) {
-      const api = `${process.env.VUE_APP_APIPATH}/room/${roomId}`;
+    async getOneRoom(context, roomId) {
       context.commit('LOADING', true);
-      Vue.axios.get(api, {
-        headers: {
-          Authorization: `Bearer ${process.env.VUE_APP_APITOKEN}`,
-        },
-      }).then((res) => {
+      await API.get(`room/${roomId}`).then((res) => {
         context.commit('SETONEROOMDATA', res.data);
         context.commit('LOADING', false);
       }).catch((err) => console.log(err));
@@ -77,20 +68,14 @@ export default new Vuex.Store({
       commit('UPPICKDATE', data);
     },
     bookingRoom({ commit, dispatch }, payload) {
-      const api = `${process.env.VUE_APP_APIPATH}/room/${payload.roomId}`;
+      const api = `room/${payload.roomId}`;
       const data = {
         name: payload.name,
         tel: payload.tel,
         date: payload.date,
       };
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${process.env.VUE_APP_APITOKEN}`,
-          accept: 'application/json',
-        },
-      };
       commit('LOADING', true);
-      Vue.axios.post(api, data, headers).then((res) => {
+      API.post(api, data).then((res) => {
         // console.log(res);
         const { status } = res;
         dispatch('getOneRoom', payload.roomId);
